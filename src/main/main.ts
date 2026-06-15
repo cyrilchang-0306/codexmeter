@@ -2,11 +2,12 @@ import {
   app,
   BrowserWindow,
   ipcMain,
+  nativeTheme,
   screen,
   shell
 } from "electron";
 import path from "node:path";
-import { appendFileSync } from "node:fs";
+import { appendFileSync, promises as fs } from "node:fs";
 import type {
   ConnectionStatus,
   MeterSettings,
@@ -22,6 +23,12 @@ import { SettingsStore } from "./settings-store";
 let mainWindow: BrowserWindow | null = null;
 let bannerWindow: BrowserWindow | null = null;
 let refreshTimer: NodeJS.Timeout | null = null;
+let bannerPositionTimer: NodeJS.Timeout | null = null;
+
+interface BannerPosition {
+  x: number;
+  y: number;
+}
 
 const client = new CodexClient();
 const notifications = new NotificationManager();
@@ -61,8 +68,9 @@ app.whenReady().then(async () => {
   state.settings = await settingsStore.load();
   applyLoginItemSetting();
   registerIpc();
-  showDesktopMeter();
+  await showDesktopMeter();
   bindClientEvents();
+  nativeTheme.on("updated", updateNativeWindowColors);
   broadcastState();
   if (!startedHidden) {
     showMainWindow();
@@ -95,6 +103,9 @@ app.on("window-all-closed", () => {
 app.on("before-quit", () => {
   if (refreshTimer) {
     clearInterval(refreshTimer);
+  }
+  if (bannerPositionTimer) {
+    clearTimeout(bannerPositionTimer);
   }
   client.stop();
 });
@@ -133,16 +144,16 @@ function updateConnection(connection: ConnectionStatus, error: string | null): v
 function createWindow(mode: "main" | "banner"): BrowserWindow {
   const isBanner = mode === "banner";
   const window = new BrowserWindow({
-    width: isBanner ? 304 : 900,
-    height: isBanner ? 72 : 680,
-    minWidth: isBanner ? 304 : 780,
-    minHeight: isBanner ? 72 : 600,
+    width: isBanner ? 344 : 900,
+    height: isBanner ? 76 : 680,
+    minWidth: isBanner ? 344 : 780,
+    minHeight: isBanner ? 76 : 600,
     show: false,
     frame: !isBanner,
     resizable: !isBanner,
     transparent: isBanner,
     title: "Codex Meter",
-    backgroundColor: isBanner ? "#00000000" : "#F4F5F7",
+    backgroundColor: isBanner ? "#00000000" : nativeWindowBackground(),
     alwaysOnTop: isBanner,
     skipTaskbar: isBanner,
     focusable: !isBanner,
@@ -179,20 +190,91 @@ function showMainWindow(): void {
   app.focus({ steal: true });
 }
 
-function showDesktopMeter(): void {
+async function showDesktopMeter(): Promise<void> {
   if (!bannerWindow || bannerWindow.isDestroyed()) {
     bannerWindow = createWindow("banner");
     bannerWindow.setAlwaysOnTop(true, "floating");
     bannerWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false });
+    bannerWindow.on("moved", scheduleBannerPositionSave);
   }
-  const display = screen.getPrimaryDisplay();
+
   const bounds = bannerWindow.getBounds();
-  bannerWindow.setPosition(
-    display.workArea.x + display.workArea.width - bounds.width - 12,
-    display.workArea.y + 6,
-    false
-  );
+  const savedPosition = await loadBannerPosition();
+  if (savedPosition && isBannerPositionVisible(savedPosition, bounds.width, bounds.height)) {
+    bannerWindow.setPosition(savedPosition.x, savedPosition.y, false);
+  } else {
+    const display = screen.getPrimaryDisplay();
+    bannerWindow.setPosition(
+      display.workArea.x + display.workArea.width - bounds.width - 12,
+      display.workArea.y + 6,
+      false
+    );
+  }
   bannerWindow.showInactive();
+}
+
+function nativeWindowBackground(): string {
+  return nativeTheme.shouldUseDarkColors ? "#111317" : "#F2F4F7";
+}
+
+function updateNativeWindowColors(): void {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.setBackgroundColor(nativeWindowBackground());
+  }
+}
+
+function bannerPositionPath(): string {
+  return path.join(app.getPath("userData"), "banner-position.json");
+}
+
+async function loadBannerPosition(): Promise<BannerPosition | null> {
+  try {
+    const contents = await fs.readFile(bannerPositionPath(), "utf8");
+    const value = JSON.parse(contents) as Partial<BannerPosition>;
+    if (Number.isInteger(value.x) && Number.isInteger(value.y)) {
+      return { x: value.x as number, y: value.y as number };
+    }
+  } catch {
+    // A missing or invalid position falls back to the top-right corner.
+  }
+  return null;
+}
+
+function isBannerPositionVisible(position: BannerPosition, width: number, height: number): boolean {
+  const centerX = position.x + width / 2;
+  const centerY = position.y + height / 2;
+  return screen.getAllDisplays().some(({ workArea }) =>
+    centerX >= workArea.x &&
+    centerX <= workArea.x + workArea.width &&
+    centerY >= workArea.y &&
+    centerY <= workArea.y + workArea.height
+  );
+}
+
+function scheduleBannerPositionSave(): void {
+  if (!bannerWindow || bannerWindow.isDestroyed()) {
+    return;
+  }
+  if (bannerPositionTimer) {
+    clearTimeout(bannerPositionTimer);
+  }
+  bannerPositionTimer = setTimeout(() => {
+    if (!bannerWindow || bannerWindow.isDestroyed()) {
+      return;
+    }
+    const { x, y } = bannerWindow.getBounds();
+    void saveBannerPosition({ x, y });
+  }, 200);
+}
+
+async function saveBannerPosition(position: BannerPosition): Promise<void> {
+  try {
+    const filePath = bannerPositionPath();
+    await fs.mkdir(path.dirname(filePath), { recursive: true });
+    await fs.writeFile(filePath, `${JSON.stringify(position, null, 2)}\n`, "utf8");
+  } catch (error) {
+    logMessage("Unable to save desktop meter position", error);
+  }
 }
 
 async function refreshNow(): Promise<void> {

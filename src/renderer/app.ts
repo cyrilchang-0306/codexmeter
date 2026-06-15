@@ -98,11 +98,16 @@ function render(): void {
 
 function renderBanner(): string {
   return `
-    <button class="fallback-banner" id="open-main" aria-label="打开 Codex Meter">
-      ${bannerValue("5 小时", state.fiveHour)}
-      <span class="banner-divider" aria-hidden="true"></span>
-      ${bannerValue("7 天", state.sevenDay)}
-    </button>
+    <div class="fallback-banner" aria-label="Codex Meter 桌面余量小组件">
+      <div class="banner-drag-surface" title="拖动以移动小组件">
+        ${bannerValue("5 小时", state.fiveHour)}
+        <span class="banner-divider" aria-hidden="true"></span>
+        ${bannerValue("7 天", state.sevenDay)}
+      </div>
+      <button class="banner-open-button" id="open-main" aria-label="打开 Codex Meter 主界面" title="打开主界面">
+        ${iconOpenWindow()}
+      </button>
+    </div>
   `;
 }
 
@@ -547,4 +552,7 @@ function iconAlert(): string {
 }
 function iconExternalLink(): string {
   return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6"/></svg>';
+}
+function iconOpenWindow(): string {
+  return '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 9h16M8 7h.01M11 7h.01"/></svg>';
 }

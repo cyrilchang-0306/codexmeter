@@ -21,22 +21,26 @@
   --red: #c93737;
   --red-soft: #fdebea;
   --focus: rgba(65, 105, 225, 0.35);
+  --banner-surface: rgba(255, 255, 255, 0.94);
+  --banner-border: rgba(20, 25, 32, 0.12);
+  --banner-shadow: 0 8px 24px rgba(19, 26, 35, 0.18);
+  --scrollbar: rgba(91, 98, 108, 0.34);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #111317;
-    --sidebar: rgba(24, 27, 32, 0.92);
-    --surface: rgba(29, 33, 39, 0.92);
+    --sidebar: rgba(21, 24, 29, 0.96);
+    --surface: rgba(29, 33, 39, 0.96);
     --surface-solid: #1d2127;
-    --surface-muted: #252a31;
-    --text: #f5f6f7;
-    --text-secondary: #b0b6bf;
-    --text-tertiary: #858c96;
-    --border: rgba(255, 255, 255, 0.1);
+    --surface-muted: #272c34;
+    --text: #f5f7fa;
+    --text-secondary: #bac1cb;
+    --text-tertiary: #929aa6;
+    --border: rgba(255, 255, 255, 0.12);
     --shadow: 0 14px 36px rgba(0, 0, 0, 0.28);
-    --accent: #7f9cff;
-    --accent-hover: #95abff;
+    --accent: #8ca6ff;
+    --accent-hover: #a2b7ff;
     --green: #5fd58e;
     --green-soft: rgba(47, 175, 99, 0.16);
     --yellow: #f2bb4a;
@@ -44,6 +48,10 @@
     --red: #ff7777;
     --red-soft: rgba(227, 75, 75, 0.16);
     --focus: rgba(127, 156, 255, 0.4);
+    --banner-surface: rgba(29, 33, 39, 0.94);
+    --banner-border: rgba(255, 255, 255, 0.14);
+    --banner-shadow: 0 10px 28px rgba(0, 0, 0, 0.42);
+    --scrollbar: rgba(190, 197, 207, 0.32);
   }
 }
 
@@ -65,6 +73,14 @@ body {
   font-size: 14px;
   line-height: 1.5;
   overflow: hidden;
+}
+
+body[data-mode="banner"] {
+  background: transparent;
+}
+
+body[data-mode="main"] {
+  color-scheme: light dark;
 }
 
 button,
@@ -90,6 +106,21 @@ svg {
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+* {
+  scrollbar-color: var(--scrollbar) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar);
+  background-clip: padding-box;
+  border: 3px solid transparent;
+  border-radius: 999px;
 }
 
 .app-shell {
@@ -638,7 +669,7 @@ button:disabled {
   width: 16px;
   height: 16px;
   content: "";
-  background: white;
+  background: #ffffff;
   border-radius: 50%;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
   transition: transform 160ms ease;
@@ -751,20 +782,56 @@ button:disabled {
   width: 100vw;
   height: 100vh;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 8px 14px;
+  gap: 6px;
+  padding: 7px;
   color: var(--text);
-  background: color-mix(in srgb, var(--surface-solid) 94%, transparent);
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
+  background: var(--banner-surface);
+  border: 1px solid var(--banner-border);
+  border-radius: 13px;
+  box-shadow: var(--banner-shadow);
+  overflow: hidden;
+}
+
+.banner-drag-surface {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-self: stretch;
+  align-items: center;
+  gap: 12px;
+  padding: 1px 7px;
+  cursor: grab;
+  user-select: none;
+  -webkit-app-region: drag;
+}
+
+.banner-drag-surface:active {
+  cursor: grabbing;
+}
+
+.banner-open-button {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 0;
+  border-radius: 9px;
   cursor: pointer;
+  transition: color 160ms ease, background 160ms ease;
   -webkit-app-region: no-drag;
 }
 
-.fallback-banner:hover {
-  background: var(--surface-solid);
+.banner-open-button:hover {
+  color: var(--text);
+  background: var(--surface-muted);
+}
+
+.banner-open-button svg {
+  width: 18px;
+  height: 18px;
 }
 
 .banner-value {
