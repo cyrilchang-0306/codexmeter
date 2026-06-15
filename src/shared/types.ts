@@ -31,6 +31,7 @@ export interface MeterSettings {
   notificationsEnabled: boolean;
   desktopOpacity: number;
   desktopAlwaysOnTop: boolean;
+  desktopLocked: boolean;
 }
 
 export interface MeterState {
@@ -66,5 +67,6 @@ export const DEFAULT_SETTINGS: MeterSettings = {
   launchAtLogin: false,
   notificationsEnabled: true,
   desktopOpacity: 100,
-  desktopAlwaysOnTop: true
+  desktopAlwaysOnTop: true,
+  desktopLocked: false
 };

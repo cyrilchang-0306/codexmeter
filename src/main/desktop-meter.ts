@@ -3,6 +3,7 @@ import type { MeterSettings } from "../shared/types";
 export interface DesktopMeterWindow {
   setOpacity(opacity: number): void;
   setAlwaysOnTop(flag: boolean, level?: "floating"): void;
+  setIgnoreMouseEvents(ignore: boolean): void;
 }
 
 export function applyDesktopMeterSettings(
@@ -15,4 +16,5 @@ export function applyDesktopMeterSettings(
   } else {
     window.setAlwaysOnTop(false);
   }
+  window.setIgnoreMouseEvents(settings.desktopLocked);
 }

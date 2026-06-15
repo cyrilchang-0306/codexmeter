@@ -145,9 +145,9 @@ function updateConnection(connection: ConnectionStatus, error: string | null): v
 function createWindow(mode: "main" | "banner"): BrowserWindow {
   const isBanner = mode === "banner";
   const window = new BrowserWindow({
-    width: isBanner ? 344 : 900,
+    width: isBanner ? 344 : 980,
     height: isBanner ? 76 : 680,
-    minWidth: isBanner ? 344 : 780,
+    minWidth: isBanner ? 344 : 840,
     minHeight: isBanner ? 76 : 600,
     show: false,
     frame: !isBanner,

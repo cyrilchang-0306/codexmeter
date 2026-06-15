@@ -91,22 +91,32 @@ async function initialize(): Promise<void> {
 }
 
 function render(): void {
+  const previousScrollTop =
+    mode === "main" ? document.querySelector<HTMLElement>(".content")?.scrollTop ?? 0 : 0;
   document.body.dataset.mode = mode;
   appRoot.innerHTML = mode === "banner" ? renderBanner() : renderMain();
   bindInteractions();
+  if (mode === "main") {
+    const content = document.querySelector<HTMLElement>(".content");
+    if (content) {
+      content.scrollTop = previousScrollTop;
+    }
+  }
 }
 
 function renderBanner(): string {
   return `
-    <div class="fallback-banner" aria-label="Codex Meter 桌面余量小组件">
+    <div class="fallback-banner ${state.settings.desktopLocked ? "locked" : ""}" aria-label="Codex Meter 桌面余量小组件">
       <div class="banner-drag-surface" title="拖动以移动小组件">
         ${bannerValue("5 小时", state.fiveHour)}
         <span class="banner-divider" aria-hidden="true"></span>
         ${bannerValue("7 天", state.sevenDay)}
       </div>
-      <button class="banner-open-button" id="open-main" aria-label="打开 Codex Meter 主界面" title="打开主界面">
-        ${iconOpenWindow()}
-      </button>
+      ${
+        state.settings.desktopLocked
+          ? `<span class="banner-lock-indicator" aria-label="小组件已锁定" title="小组件已锁定">${iconLock()}</span>`
+          : `<button class="banner-open-button" id="open-main" aria-label="打开 Codex Meter 主界面" title="打开主界面">${iconOpenWindow()}</button>`
+      }
     </div>
   `;
 }
@@ -272,7 +282,7 @@ function renderSettings(): string {
         <div class="section-heading">
           <div>
             <h2>桌面小组件</h2>
-            <p>调整小组件透明度，以及是否始终显示在其他应用上方。</p>
+            <p>调整透明度、窗口层级和鼠标交互。</p>
           </div>
           <label class="switch">
             <input id="desktopAlwaysOnTop" type="checkbox" ${settings.desktopAlwaysOnTop ? "checked" : ""} />
@@ -299,6 +309,17 @@ function renderSettings(): string {
             <span>不透明</span>
           </span>
         </label>
+        <div class="lock-setting">
+          <div>
+            <strong>锁定小组件</strong>
+            <p>锁定后鼠标会穿透小组件，无法点击或拖动。可从 Dock 打开 Codex Meter 并在此解锁。</p>
+          </div>
+          <label class="switch">
+            <input id="desktopLocked" type="checkbox" ${settings.desktopLocked ? "checked" : ""} />
+            <span class="switch-track" aria-hidden="true"></span>
+            <span class="switch-label">鼠标穿透</span>
+          </label>
+        </div>
       </section>
 
       <section class="settings-card about-card">
@@ -528,7 +549,9 @@ function readSettingsForm(): MeterSettings {
     launchAtLogin: document.querySelector<HTMLInputElement>("#launchAtLogin")?.checked ?? false,
     desktopOpacity: numberValue("desktopOpacity"),
     desktopAlwaysOnTop:
-      document.querySelector<HTMLInputElement>("#desktopAlwaysOnTop")?.checked ?? false
+      document.querySelector<HTMLInputElement>("#desktopAlwaysOnTop")?.checked ?? false,
+    desktopLocked:
+      document.querySelector<HTMLInputElement>("#desktopLocked")?.checked ?? false
   };
 }
 
@@ -599,4 +622,7 @@ function iconExternalLink(): string {
 }
 function iconOpenWindow(): string {
   return '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 9h16M8 7h.01M11 7h.01"/></svg>';
+}
+function iconLock(): string {
+  return '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v2"/></svg>';
 }

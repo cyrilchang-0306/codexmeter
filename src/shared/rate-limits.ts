@@ -99,7 +99,8 @@ export function sanitizeSettings(value: Partial<MeterSettings> | null | undefine
       value?.notificationsEnabled ?? DEFAULT_SETTINGS.notificationsEnabled,
     desktopOpacity: value?.desktopOpacity ?? DEFAULT_SETTINGS.desktopOpacity,
     desktopAlwaysOnTop:
-      value?.desktopAlwaysOnTop ?? DEFAULT_SETTINGS.desktopAlwaysOnTop
+      value?.desktopAlwaysOnTop ?? DEFAULT_SETTINGS.desktopAlwaysOnTop,
+    desktopLocked: value?.desktopLocked ?? DEFAULT_SETTINGS.desktopLocked
   };
 
   return validateSettings(candidate) ? { ...DEFAULT_SETTINGS } : candidate;

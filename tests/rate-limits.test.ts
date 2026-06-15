@@ -75,7 +75,8 @@ describe("threshold settings", () => {
       })
     ).toMatchObject({
       desktopOpacity: 100,
-      desktopAlwaysOnTop: true
+      desktopAlwaysOnTop: true,
+      desktopLocked: false
     });
   });
 });
