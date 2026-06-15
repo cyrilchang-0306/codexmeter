@@ -4,7 +4,7 @@ Codex Meter 是一款 macOS 桌面用量监控工具，通过本机 Codex
 `app-server` 实时显示 5 小时和 7 天两个限额窗口的剩余百分比及重置时间。
 
 ![Platform](https://img.shields.io/badge/platform-macOS-lightgrey)
-![Version](https://img.shields.io/badge/version-0.2.3-blue)
+![Version](https://img.shields.io/badge/version-0.2.4-blue)
 ![Electron](https://img.shields.io/badge/Electron-41-47848F)
 
 ## 功能
@@ -18,6 +18,7 @@ Codex Meter 是一款 macOS 桌面用量监控工具，通过本机 Codex
 - 支持 macOS 登录后自动启动
 - 连接中断后自动重连
 - 小组件可自由拖动，并自动记住上次位置
+- 可调整小组件透明度，并选择是否始终置顶
 - 主界面与小组件跟随 macOS 自动切换浅色、深色外观
 
 ## 数据来源与隐私

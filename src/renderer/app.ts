@@ -200,7 +200,7 @@ function renderSettings(): string {
       <div>
         <p class="eyebrow">偏好设置</p>
         <h1>显示与提醒</h1>
-        <p class="subtitle">颜色分档和通知阈值相互独立。</p>
+        <p class="subtitle">管理颜色、通知和桌面小组件行为。</p>
       </div>
     </header>
     <form id="settings-form" class="settings-layout" novalidate>
@@ -266,6 +266,39 @@ function renderSettings(): string {
             <span class="switch-label">登录后启动</span>
           </label>
         </div>
+      </section>
+
+      <section class="settings-card">
+        <div class="section-heading">
+          <div>
+            <h2>桌面小组件</h2>
+            <p>调整小组件透明度，以及是否始终显示在其他应用上方。</p>
+          </div>
+          <label class="switch">
+            <input id="desktopAlwaysOnTop" type="checkbox" ${settings.desktopAlwaysOnTop ? "checked" : ""} />
+            <span class="switch-track" aria-hidden="true"></span>
+            <span class="switch-label">始终置顶</span>
+          </label>
+        </div>
+        <label class="opacity-field" for="desktopOpacity">
+          <span class="opacity-heading">
+            <strong>透明度</strong>
+            <output id="desktop-opacity-value" for="desktopOpacity">${settings.desktopOpacity}%</output>
+          </span>
+          <input
+            id="desktopOpacity"
+            name="desktopOpacity"
+            type="range"
+            min="20"
+            max="100"
+            step="1"
+            value="${settings.desktopOpacity}"
+          />
+          <span class="range-labels" aria-hidden="true">
+            <span>更透明</span>
+            <span>不透明</span>
+          </span>
+        </label>
       </section>
 
       <section class="settings-card about-card">
@@ -462,6 +495,14 @@ function bindInteractions(): void {
       }
     });
   }
+
+  document.querySelector<HTMLInputElement>("#desktopOpacity")?.addEventListener("input", (event) => {
+    const input = event.currentTarget as HTMLInputElement;
+    const output = document.querySelector<HTMLOutputElement>("#desktop-opacity-value");
+    if (output) {
+      output.value = `${input.value}%`;
+    }
+  });
 }
 
 function updateThresholdPreview(settings: MeterSettings): void {
@@ -484,7 +525,10 @@ function readSettingsForm(): MeterSettings {
     notificationThreshold: numberValue("notificationThreshold"),
     notificationsEnabled:
       document.querySelector<HTMLInputElement>("#notificationsEnabled")?.checked ?? false,
-    launchAtLogin: document.querySelector<HTMLInputElement>("#launchAtLogin")?.checked ?? false
+    launchAtLogin: document.querySelector<HTMLInputElement>("#launchAtLogin")?.checked ?? false,
+    desktopOpacity: numberValue("desktopOpacity"),
+    desktopAlwaysOnTop:
+      document.querySelector<HTMLInputElement>("#desktopAlwaysOnTop")?.checked ?? false
   };
 }
 

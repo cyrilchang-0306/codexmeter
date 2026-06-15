@@ -17,6 +17,7 @@ import type {
 import { DEFAULT_SETTINGS } from "../shared/types";
 import { identifyWindows, validateSettings } from "../shared/rate-limits";
 import { CodexClient } from "./codex-client";
+import { applyDesktopMeterSettings } from "./desktop-meter";
 import { NotificationManager } from "./notification-manager";
 import { SettingsStore } from "./settings-store";
 
@@ -154,7 +155,7 @@ function createWindow(mode: "main" | "banner"): BrowserWindow {
     transparent: isBanner,
     title: "Codex Meter",
     backgroundColor: isBanner ? "#00000000" : nativeWindowBackground(),
-    alwaysOnTop: isBanner,
+    alwaysOnTop: isBanner && state.settings.desktopAlwaysOnTop,
     skipTaskbar: isBanner,
     focusable: !isBanner,
     hasShadow: !isBanner,
@@ -193,10 +194,10 @@ function showMainWindow(): void {
 async function showDesktopMeter(): Promise<void> {
   if (!bannerWindow || bannerWindow.isDestroyed()) {
     bannerWindow = createWindow("banner");
-    bannerWindow.setAlwaysOnTop(true, "floating");
     bannerWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false });
     bannerWindow.on("moved", scheduleBannerPositionSave);
   }
+  applyDesktopMeterSettings(bannerWindow, state.settings);
 
   const bounds = bannerWindow.getBounds();
   const savedPosition = await loadBannerPosition();
@@ -315,6 +316,9 @@ function registerIpc(): void {
     await settingsStore.save(settings);
     state = { ...state, settings };
     applyLoginItemSetting();
+    if (bannerWindow && !bannerWindow.isDestroyed()) {
+      applyDesktopMeterSettings(bannerWindow, settings);
+    }
     notifications.evaluate(state);
     broadcastState();
     return { ok: true, settings };
@@ -323,6 +327,9 @@ function registerIpc(): void {
     const settings = await settingsStore.reset();
     state = { ...state, settings };
     applyLoginItemSetting();
+    if (bannerWindow && !bannerWindow.isDestroyed()) {
+      applyDesktopMeterSettings(bannerWindow, settings);
+    }
     broadcastState();
     return settings;
   });

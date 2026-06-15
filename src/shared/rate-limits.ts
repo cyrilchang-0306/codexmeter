@@ -73,6 +73,14 @@ export function validateSettings(settings: MeterSettings): string | null {
     }
   }
 
+  if (
+    !Number.isInteger(settings.desktopOpacity) ||
+    settings.desktopOpacity < 20 ||
+    settings.desktopOpacity > 100
+  ) {
+    return "桌面小组件透明度必须是 20 到 100 之间的整数。";
+  }
+
   if (settings.redMax >= settings.yellowMax) {
     return "红色上限必须小于黄色上限。";
   }
@@ -88,7 +96,10 @@ export function sanitizeSettings(value: Partial<MeterSettings> | null | undefine
       value?.notificationThreshold ?? DEFAULT_SETTINGS.notificationThreshold,
     launchAtLogin: value?.launchAtLogin ?? DEFAULT_SETTINGS.launchAtLogin,
     notificationsEnabled:
-      value?.notificationsEnabled ?? DEFAULT_SETTINGS.notificationsEnabled
+      value?.notificationsEnabled ?? DEFAULT_SETTINGS.notificationsEnabled,
+    desktopOpacity: value?.desktopOpacity ?? DEFAULT_SETTINGS.desktopOpacity,
+    desktopAlwaysOnTop:
+      value?.desktopAlwaysOnTop ?? DEFAULT_SETTINGS.desktopAlwaysOnTop
   };
 
   return validateSettings(candidate) ? { ...DEFAULT_SETTINGS } : candidate;

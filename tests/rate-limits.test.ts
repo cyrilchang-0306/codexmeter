@@ -4,6 +4,7 @@ import {
   levelForRemaining,
   mergeSnapshot,
   remainingPercent,
+  sanitizeSettings,
   validateSettings
 } from "../src/shared/rate-limits";
 import { DEFAULT_SETTINGS } from "../src/shared/types";
@@ -60,5 +61,21 @@ describe("threshold settings", () => {
       "通知阈值"
     );
     expect(validateSettings({ ...DEFAULT_SETTINGS, redMax: 10.5 })).toContain("整数");
+    expect(validateSettings({ ...DEFAULT_SETTINGS, desktopOpacity: 19 })).toContain("透明度");
+  });
+
+  it("fills new desktop meter settings for existing users", () => {
+    expect(
+      sanitizeSettings({
+        redMax: 10,
+        yellowMax: 30,
+        notificationThreshold: 10,
+        launchAtLogin: false,
+        notificationsEnabled: true
+      })
+    ).toMatchObject({
+      desktopOpacity: 100,
+      desktopAlwaysOnTop: true
+    });
   });
 });

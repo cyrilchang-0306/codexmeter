@@ -594,6 +594,43 @@ button:disabled {
   margin-top: 18px;
 }
 
+.opacity-field {
+  display: grid;
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.opacity-heading,
+.range-labels {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.opacity-heading strong {
+  font-size: 12px;
+}
+
+.opacity-heading output {
+  color: var(--accent);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.opacity-field input[type="range"] {
+  width: 100%;
+  height: 28px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.range-labels {
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
 .field {
   display: grid;
   gap: 7px;
